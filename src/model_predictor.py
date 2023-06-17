@@ -37,8 +37,7 @@ class ModelPredictor:
         # else: 
         #     mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI'))
         
-        mlflow.set_tracking_uri("http://127.0.0.1:5001/")
-        logging.info(f"http://localhost:5001")
+        mlflow.set_tracking_uri("http://127.0.0.1:5000")
         self.prob_config = create_prob_config(
             self.config["phase_id"], self.config["prob_id"]
         )
