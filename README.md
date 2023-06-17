@@ -50,11 +50,11 @@ This repository is the sample solution for MLOps Marathon 2023.
     -   Train model
 
         ```bash
-        export MLFLOW_TRACKING_URI=http://localhost:5000
+        export MLFLOW_TRACKING_URI=http://localhost:5001
         python src/model_trainer.py --phase-id phase-1 --prob-id prob-1
         ```
 
-    -   Register model: Go to mlflow UI at <http://localhost:5000> and register a new model named **phase-1_prob-1_model-1**
+    -   Register model: Go to mlflow UI at <http://localhost:5001> and register a new model named **phase-1_prob-1_model-1**
 
 3.  Deploy model predictor
 
@@ -71,7 +71,7 @@ This repository is the sample solution for MLOps Marathon 2023.
 
         ```bash
         # run model predictor
-        export MLFLOW_TRACKING_URI=http://localhost:5000
+        export MLFLOW_TRACKING_URI=http://localhost:5001
         python src/model_predictor.py --config-path data/model_config/phase-1/prob-1/model-1.yaml --port 8000
 
         # curl in another terminal
@@ -124,11 +124,11 @@ This repository is the sample solution for MLOps Marathon 2023.
     -   Improve model with updated data
 
         ```bash
-        export MLFLOW_TRACKING_URI=http://localhost:5000
+        export MLFLOW_TRACKING_URI=http://localhost:5001
         python src/model_trainer.py --phase-id phase-1 --prob-id prob-1 --add-captured-data true
         ```
 
-    -   Register model: Go to mlflow UI at <http://localhost:5000> and register model using the existing name **phase-1_prob-1_model-1**. The latest model version now should be `2`.
+    -   Register model: Go to mlflow UI at <http://localhost:5001> and register model using the existing name **phase-1_prob-1_model-1**. The latest model version now should be `2`.
 
     -   Update model config at `data/model_config/phase-1/prob-1/model-1.yaml` to:
 

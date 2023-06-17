@@ -11,13 +11,14 @@ import yaml
 from fastapi import FastAPI, Request
 from pandas.util import hash_pandas_object
 from pydantic import BaseModel
+from cachetools import TTLCache
+import json
 
 from problem_config import ProblemConst, create_prob_config
 from raw_data_processor import RawDataProcessor
 from utils import AppConfig, AppPath
 
 PREDICTOR_API_PORT = 8000
-
 
 class Data(BaseModel):
     id: str
@@ -46,11 +47,12 @@ class ModelPredictor:
         )
         self.model = mlflow.pyfunc.load_model(model_uri)
 
+
     def detect_drift(self, feature_df) -> int:
         # watch drift between coming requests and training data
         time.sleep(0.02)
         return random.choice([0, 1])
-
+    
     def predict(self, data: Data):
         start_time = time.time()
 
@@ -61,6 +63,7 @@ class ModelPredictor:
             categorical_cols=self.prob_config.categorical_cols,
             category_index=self.category_index,
         )
+
         # save request data for improving models
         ModelPredictor.save_request_data(
             feature_df, self.prob_config.captured_data_dir, data.id
@@ -93,6 +96,9 @@ class PredictorApi:
         self.predictor = predictor
         self.app = FastAPI()
 
+        # Create a cache instance with a maximum of 1000 entries and a TTL (time-to-live) of 300 seconds (5 minutes)
+        self.cache = TTLCache(maxsize=1000, ttl=300)
+
         @self.app.get("/")
         async def root():
             return {"message": "hello"}
@@ -100,10 +106,16 @@ class PredictorApi:
         @self.app.post("/phase-1/prob-1/predict")
         async def predict(data: Data, request: Request):
             self._log_request(request)
-            response = self.predictor.predict(data)
+            data_json = json.dumps(data.__dict__, sort_keys=True)
+
+            if data_json in self.cache: 
+                response = self.cache[data_json]
+            else:
+                response = self.predictor.predict(data)
+                self.cache[data_json] = response
             self._log_response(response)
             return response
-
+ 
     @staticmethod
     def _log_request(request: Request):
         pass
