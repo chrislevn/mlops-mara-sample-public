@@ -17,6 +17,7 @@ import json
 from problem_config import ProblemConst, create_prob_config
 from raw_data_processor import RawDataProcessor
 from utils import AppConfig, AppPath
+import os 
 
 PREDICTOR_API_PORT = 8000
 
@@ -30,10 +31,14 @@ class ModelPredictor:
     def __init__(self, config_file_path):
         with open(config_file_path, "r") as f:
             self.config = yaml.safe_load(f)
-        logging.info(f"model-config: {self.config}")
-
-        mlflow.set_tracking_uri(AppConfig.MLFLOW_TRACKING_URI)
-
+        # logging.info(f"model-config: {self.config}")
+        # if AppConfig.MLFLOW_TRACKING_URI:
+        #     mlflow.set_tracking_uri(AppConfig.MLFLOW_TRACKING_URI)
+        # else: 
+        #     mlflow.set_tracking_uri(os.environ.get('MLFLOW_TRACKING_URI'))
+        
+        mlflow.set_tracking_uri("http://127.0.0.1:5001/")
+        logging.info(f"http://localhost:5001")
         self.prob_config = create_prob_config(
             self.config["phase_id"], self.config["prob_id"]
         )
@@ -45,6 +50,8 @@ class ModelPredictor:
         model_uri = os.path.join(
             "models:/", self.config["model_name"], str(self.config["model_version"])
         )
+        logging.info(f"model uri: {model_uri}")
+
         self.model = mlflow.pyfunc.load_model(model_uri)
 
 
